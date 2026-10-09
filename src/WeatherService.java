@@ -11,7 +11,14 @@ public class WeatherService {
     private final HttpClient client = HttpClient.newHttpClient();
 
     public String getWeatherData(String city) {
+        return fetchWeatherData(city, "weather");
+    }
 
+    public String getForecastData(String city) {
+        return fetchWeatherData(city, "forecast");
+    }
+
+    private String fetchWeatherData(String city, String endpoint) {
         String apiKey = System.getenv("OPENWEATHER_API_KEY");
 
         if (apiKey == null || apiKey.isBlank()) {
@@ -19,10 +26,14 @@ public class WeatherService {
             return null;
         }
 
-        String encodedCity = URLEncoder.encode(city, StandardCharsets.UTF_8);
-        String url = "https://api.openweathermap.org/data/2.5/weather"
+        String encodedCity = URLEncoder.encode(
+                city, StandardCharsets.UTF_8);
+
+        String url = "https://api.openweathermap.org/data/2.5/"
+                + endpoint
                 + "?q=" + encodedCity
-                + "&appid=" + URLEncoder.encode(apiKey, StandardCharsets.UTF_8)
+                + "&appid=" + URLEncoder.encode(
+                        apiKey, StandardCharsets.UTF_8)
                 + "&units=metric";
 
         try {
@@ -32,27 +43,27 @@ public class WeatherService {
                     .build();
 
             HttpResponse<String> response = client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
+                    request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                System.out.println("Weather API error (HTTP " + response.statusCode()
-                        + "): " + response.body());
+                System.out.println("Weather API error (HTTP "
+                        + response.statusCode() + ").");
                 return null;
             }
 
             return response.body();
 
         } catch (IOException e) {
-            System.out.println("Network error while connecting to the weather API. Check your internet connection and try again.");
+            System.out.println("Network error. Check your internet.");
             return null;
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.out.println("Weather API request was interrupted.");
+            System.out.println("Weather request was interrupted.");
             return null;
+
         } catch (IllegalArgumentException e) {
-            System.out.println("Could not create a valid weather API request.");
+            System.out.println("Invalid weather API request.");
             return null;
         }
     }
