@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,9 +19,10 @@ public class WeatherService {
             return null;
         }
 
+        String encodedCity = URLEncoder.encode(city, StandardCharsets.UTF_8);
         String url = "https://api.openweathermap.org/data/2.5/weather"
-                + "?q=" + city
-                + "&appid=" + apiKey
+                + "?q=" + encodedCity
+                + "&appid=" + URLEncoder.encode(apiKey, StandardCharsets.UTF_8)
                 + "&units=metric";
 
         try {
@@ -33,14 +37,22 @@ public class WeatherService {
             );
 
             if (response.statusCode() != 200) {
-                System.out.println("Weather API error: " + response.statusCode());
+                System.out.println("Weather API error (HTTP " + response.statusCode()
+                        + "): " + response.body());
                 return null;
             }
 
             return response.body();
 
-        } catch (Exception e) {
-            System.out.println("Error connecting to weather API.");
+        } catch (IOException e) {
+            System.out.println("Network error while connecting to the weather API. Check your internet connection and try again.");
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Weather API request was interrupted.");
+            return null;
+        } catch (IllegalArgumentException e) {
+            System.out.println("Could not create a valid weather API request.");
             return null;
         }
     }
