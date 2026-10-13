@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -6,9 +8,30 @@ public class Main {
             System.out.println("===============================");
             System.out.println("          WEATHER APP");
             System.out.println("===============================");
+            System.out.print("Press Enter to speak, or type a city: ");
+            String input = scanner.nextLine().trim();
+            String city = WeatherVoiceInput.normalizeCityRequest(input);
+            boolean voiceSearch = input.isEmpty();
 
-            System.out.print("Enter a city name: ");
-            String city = scanner.nextLine().trim();
+            if (voiceSearch) {
+                try {
+                    city = WeatherVoiceInput.normalizeCityRequest(
+                            WindowsSpeechAssistant.listenForCity());
+                } catch (IOException e) {
+                    System.err.println(
+                            "Windows voice input is unavailable: " + e.getMessage());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    System.err.println("Voice input was interrupted.");
+                    return;
+                }
+
+                if (city.isEmpty()) {
+                    System.out.print("Type a city name instead: ");
+                    city = WeatherVoiceInput.normalizeCityRequest(scanner.nextLine());
+                    voiceSearch = false;
+                }
+            }
 
             if (city.isEmpty()) {
                 System.out.println("City name cannot be empty.");
@@ -16,66 +39,73 @@ public class Main {
             }
 
             WeatherService service = new WeatherService();
-            String data = service.getWeatherData(city);
-
-            if (data == null) {
-                System.out.println("Unable to retrieve current weather.");
+            Weather weather;
+            try {
+                weather = service.getCurrentWeather(city);
+            } catch (IllegalArgumentException e) {
+                System.err.println(e.getMessage());
+                return;
+            } catch (IOException e) {
+                System.err.println("Could not get weather: " + e.getMessage());
+                return;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Weather request was interrupted.");
                 return;
             }
+
+            System.out.println();
+            System.out.println("Current Weather in " + weather.getCity());
+            System.out.printf("Temperature: %.2f\u00B0C%n",
+                    weather.getTemperature());
+            System.out.printf("Conditions: %s%n", weather.getDescription());
+            System.out.printf("Humidity: %.0f%%%n",
+                    weather.getHumidity());
+            System.out.printf("Wind speed: %.1f m/s%n",
+                    weather.getWindSpeed());
 
             try {
-                String actualCity =
-                    data.split("\"name\":\"")[1].split("\"")[0];
-
-                double temperature = Double.parseDouble(
-                    data.split("\"temp\":")[1].split(",")[0]);
-
-                System.out.println("\nCurrent Weather in " + actualCity);
-                System.out.printf("Temperature: %.2f\u00B0C%n", temperature);
-            } catch (Exception e) {
-                System.out.println("Could not read current weather.");
-                return;
+                System.out.println("\n========== WEATHER FORECAST ==========");
+                List<Forecast> forecast = service.getForecast(city);
+                if (!forecast.isEmpty()) {
+                    System.out.printf("%-22s %-12s %-12s%n",
+                            "Date & Time", "Temp (C)", "Humidity");
+                    System.out.println("-----------------------------------------------");
+                    for (Forecast entry : forecast.stream().limit(8).toList()) {
+                        System.out.printf("%-22s %-12.2f %-12.0f%n",
+                                entry.getDateTime(),
+                                entry.getTemperature(),
+                                entry.getHumidity());
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println(
+                        "Could not get the forecast: " + e.getMessage());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Forecast request was interrupted.");
             }
 
-            System.out.println("\n========== WEATHER FORECAST ==========");
-
-            String forecastData = service.getForecastData(city);
-
-            if (forecastData == null) {
-                System.out.println("Could not retrieve forecast data.");
-                return;
-            }
-
-            try {
-                String[] entries = forecastData.split("\\{\"dt\":");
-                int count = 0;
-
-                System.out.printf("%-22s %-12s %-12s%n",
-                    "Date & Time", "Temp (C)", "Humidity");
-                System.out.println("-----------------------------------------------");
-
-                for (int i = 1; i < entries.length && count < 8; i++) {
-                    String entry = entries[i];
-
-                    String dateTime =
-                        entry.split("\"dt_txt\":\"")[1].split("\"")[0];
-
-                    double temp = Double.parseDouble(
-                        entry.split("\"temp\":")[1].split(",")[0]);
-
-                    int humidity = Integer.parseInt(
-                        entry.split("\"humidity\":")[1].split(",")[0]);
-
-                    System.out.printf("%-22s %-12.2f %-12d%n",
-                        dateTime, temp, humidity);
-                    count++;
+            if (voiceSearch) {
+                String summary = String.format(
+                        java.util.Locale.ROOT,
+                        "In %s, it is %.0f degrees Celsius with %s. "
+                                + "Humidity is %.0f percent and wind speed is "
+                                + "%.1f meters per second.",
+                        weather.getCity(),
+                        weather.getTemperature(),
+                        weather.getDescription(),
+                        weather.getHumidity(),
+                        weather.getWindSpeed());
+                try {
+                    WindowsSpeechAssistant.speak(summary);
+                } catch (IOException e) {
+                    System.err.println(
+                            "Could not speak the weather summary: " + e.getMessage());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    System.err.println("Weather speech was interrupted.");
                 }
-
-                if (count == 0) {
-                    System.out.println("No forecast entries found.");
-                }
-            } catch (Exception e) {
-                System.out.println("Could not parse forecast data.");
             }
         }
     }
