@@ -1,21 +1,21 @@
 # 🌦️ SkyCast – Real-Time Weather Application Using Java Stream API
 
-SkyCast is a web-based weather application built using Java that displays real-time weather information and a five-day forecast for any supported city. It uses the OpenWeatherMap API to retrieve weather data and Java Stream API concepts to process forecast information.
+SkyCast is a web-based weather application built using Java that displays current conditions, an hourly outlook, and a five-day forecast for a searched city. It uses the OpenWeatherMap API to retrieve weather data and serves a responsive browser interface from a lightweight Java web server.
 
 ## ✨ Features
 
 * 🌍 **City-Based Weather Search** – Search for weather information by city name.
 * 🌡️ **Current Weather** – View temperature, feels-like temperature, humidity, wind speed, and atmospheric pressure.
 * 🕒 **Today's Forecast** – View available three-hour temperature forecasts.
-* 📅 **Five-Day Forecast** – View daily average temperatures and the highest forecast rain probability for each day.
+* 📅 **Five-Day Forecast** – View daily high and low temperatures and precipitation chances.
 * ☁️ **Weather Icons** – Display weather conditions with corresponding icons.
-* 🤖 **Gemini AI Weather Assistant** – Ask weather-related questions using Google's Gemini API, when configured.
-* 📱 **Responsive Interface** – Dark-themed dashboard designed for desktop and mobile screens.
+* 📱 **Responsive Interface** – Browse a clear dashboard on desktop or mobile, with light and dark appearances.
+* 🎙️ **Voice Weather Assistant** – Search by voice in a supported browser or use Windows speech recognition in the terminal, with spoken weather summaries.
 * 🔐 **Environment-Based API Keys** – Keep API keys outside the source code.
 
 ## 🛠️ Technologies Used
 
-* Java 21
+* Java 17
 * Java Stream API
 * Java HTTP Client
 * Java `HttpServer`
@@ -23,7 +23,6 @@ SkyCast is a web-based weather application built using Java that displays real-t
 * CSS3
 * JavaScript
 * OpenWeatherMap API
-* Google Gemini API (optional AI assistant)
 * Visual Studio Code
 * Git and GitHub
 
@@ -31,13 +30,10 @@ SkyCast is a web-based weather application built using Java that displays real-t
 
 Before running the application, make sure you have:
 
-* Java Development Kit (JDK) 21 or compatible version
+* Java Development Kit (JDK) 17
 * Visual Studio Code or another Java-compatible editor
 * An OpenWeatherMap API key
-* A Google Gemini API key if you want to use the AI assistant
 * Internet access
-
-**Note:** Maven is not required for the current version of this project.
 
 ## 📁 Project Structure
 
@@ -49,12 +45,11 @@ java-mini-project/
 │   ├── WeatherService.java
 │   ├── Forecast.java
 │   ├── WeatherWebServer.java
-│   ├── GeminiChat.java
-│   └── index.html
+│   ├── index.html
+│   ├── styles.css
+│   └── app.js
 └── README.md
 ```
-
-The exact files may vary depending on your current implementation.
 
 ## 🔑 API Configuration
 
@@ -62,25 +57,19 @@ The exact files may vary depending on your current implementation.
 
 Obtain an API key from [OpenWeatherMap](https://openweathermap.org/api).
 
-Set the environment variable in PowerShell:
+Create a `.env` file in the project root (next to this README) with:
+
+```text
+OPENWEATHER_API_KEY=YOUR_OPENWEATHER_API_KEY
+```
+
+Replace the placeholder with your actual key. `.env` is excluded by `.gitignore`; never commit API keys to GitHub. The application checks the `OPENWEATHER_API_KEY` environment variable first, then reads the ignored project-root `.env` file.
+
+Alternatively, configure the key in PowerShell for the current session:
 
 ```powershell
 $env:OPENWEATHER_API_KEY = "YOUR_OPENWEATHER_API_KEY"
 ```
-
-### 2. Google Gemini API (Optional)
-
-Obtain a Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey).
-
-Set the environment variable:
-
-```powershell
-$env:GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
-```
-
-Replace the placeholder values with your actual keys. Never commit API keys to GitHub.
-
-These PowerShell variables apply to the current terminal session. If you open a new terminal, configure them again.
 
 ## ▶️ How to Run the Project
 
@@ -100,61 +89,44 @@ Open this folder in Visual Studio Code.
 
 ### Step 3: Configure API Keys
 
-Set the OpenWeatherMap API key and, if needed, the Gemini API key in the same PowerShell terminal that will run the application.
+Set the OpenWeatherMap API key in the same PowerShell terminal that will run the application.
 
-### Step 4: Compile the Java Files
-
-```powershell
-javac -encoding UTF-8 --add-modules jdk.httpserver -cp src -d src src\*.java
-```
-
-### Step 5: Start the Web Server
+### Step 4: Compile with Java 17
 
 ```powershell
-java --add-modules jdk.httpserver -cp src WeatherWebServer
+Set-Location .\src
+javac *.java
 ```
 
-If the server starts successfully, the terminal should display a message similar to:
+### Step 5: Run the Java Terminal Weather App
 
-```text
-Weather website running at http://localhost:8080
-Keep this terminal open.
+```powershell
+java Main
 ```
 
-### Step 6: Open the Application
+Enter a city name when prompted. The app prints current conditions, temperature, humidity, and wind speed.
 
-Open your browser and visit:
+Press Enter at the city prompt to speak a city or ask for its weather. The terminal voice assistant uses Windows PowerShell and the built-in `System.Speech` service. A microphone and an installed Windows speech recognizer are required; if voice input is unavailable, type a city when prompted.
+
+Run both commands from the `src` directory. No build tool or external JAR is needed.
+
+### Run the Browser Weather Dashboard
+
+To start the existing browser UI after compiling, run:
+
+```powershell
+java --add-modules jdk.httpserver -cp . WeatherWebServer
+```
+
+Keep the terminal open and visit:
 
 **http://localhost:8080**
 
-Enter a city name, click Search, and view the available weather information and forecast.
+In a browser that supports the Web Speech API, select **Speak**, allow microphone access, and say a city or a request such as “weather in Chennai.” The dashboard reads the current conditions and the next forecast aloud. Browser voice search works on localhost and may require a secure connection and microphone permission.
 
-## 🌊 How Java Stream API Is Used
+## 🌦️ Weather API
 
-Java Stream API can simplify the processing and aggregation of forecast data.
-
-Typical operations include:
-
-* `filter()` – Select forecast entries for a particular date.
-* `map()` – Extract temperatures or other required values.
-* `collect()` – Group forecast entries by date.
-* `reduce()` – Calculate a total or average from temperature values.
-* `sorted()` – Arrange forecast entries chronologically.
-
-These operations help make forecast processing more readable and maintainable. The exact operations used depend on the implementation in the Java source files.
-
-## 🤖 Gemini AI Weather Assistant
-
-When configured, the Gemini AI assistant accepts a user's question, retrieves the available weather context, and sends a request to Google's Gemini API.
-
-For example:
-
-* What is the current temperature in Chennai?
-* How humid is the weather?
-* What is the forecast for the next few days?
-* Is rain expected in the available forecast?
-
-The assistant should use the supplied weather data and avoid inventing conditions when the data is unavailable.
+The terminal app requests current conditions directly from OpenWeatherMap. The browser server also exposes `/api/weather?city=Chennai` and `/api/forecast?city=Chennai`. Both use `OPENWEATHER_API_KEY`; the key stays on the server and is not sent to the browser.
 
 ## ⚠️ Troubleshooting
 
@@ -192,12 +164,6 @@ Then start the application again.
 http://localhost:8080/api/weather?city=Chennai
 ```
 
-### Gemini Assistant Is Not Responding
-
-* Verify that `GEMINI_API_KEY` is configured.
-* Check the server terminal for Gemini API errors.
-* Verify model access, API quota, and network connectivity.
-
 ## 🔒 Security
 
 * Do not hardcode API keys in Java or HTML files.
@@ -211,9 +177,8 @@ http://localhost:8080/api/weather?city=Chennai
 * Weather alerts and notifications
 * Weather data visualization and charts
 * Unit conversion between Celsius and Fahrenheit
-* Improved AI assistant conversation history
 * More detailed forecast analytics
-* Automated tests and build configuration
+* Automated tests
 
 ## 👨‍💻 Author
 

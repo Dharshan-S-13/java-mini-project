@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f7f8">
+  <meta name="description" content="A clear, calm view of current weather and the five-day forecast.">
+  <title>SkyCast | Weather at a glance</title>
+  <link rel="preconnect" href="https://openweathermap.org">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="SkyCast home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>skycast</span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link active" href="#today">Today</a>
+        <a class="nav-link" id="forecast-nav" href="#forecast-preview">5-day forecast</a>
+      </nav>
+      <button class="theme-toggle" id="theme-toggle" type="button"
+              aria-label="Switch to dark appearance" title="Switch appearance">
+        <span class="theme-glyph" aria-hidden="true"></span>
+      </button>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div class="intro-copy">
+          <p class="eyebrow">A little more in tune with the day</p>
+          <h1 id="page-title">Weather, at a glance.</h1>
+          <p class="intro-text">See current conditions and the forecast for the days ahead.</p>
+        </div>
+        <form class="search-form" id="search-form" role="search">
+          <label class="visually-hidden" for="city-input">Search by city</label>
+          <span class="search-glyph" aria-hidden="true"></span>
+          <input id="city-input" name="city" type="search" maxlength="100"
+                 placeholder="Search a city" autocomplete="off"
+                 aria-describedby="search-help">
+          <button class="voice-button" id="voice-button" type="button"
+                  aria-label="Search by voice" aria-pressed="false" hidden>Speak</button>
+          <button class="search-button" id="search-button" type="submit">Search</button>
+          <span class="visually-hidden" id="search-help">Enter a city name or use voice search to hear its weather.</span>
+        </form>
+      </section>
+
+      <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+
+      <section class="weather-layout" id="today" aria-label="Current weather">
+        <article class="current-panel" id="current-panel">
+          <div class="current-copy">
+            <div class="current-heading">
+              <p class="eyebrow">Right now</p>
+              <h2 id="city-name">Your day starts here</h2>
+              <p class="current-date" id="current-date">Search for a city to see local conditions.</p>
+            </div>
+            <div class="current-reading">
+              <span class="temperature-group">
+                <span class="temperature" id="temperature">--</span>
+                <span class="temperature-unit" aria-hidden="true">°C</span>
+              </span>
+              <div class="condition-copy">
+                <p id="condition">Search to see local weather.</p>
+                <span id="country-name">Your next forecast is one search away.</span>
+              </div>
+            </div>
+          </div>
+          <div class="weather-art" id="weather-art">
+            <img id="current-icon" alt="" aria-hidden="true" hidden>
+          </div>
+          <div class="empty-prompt" id="empty-prompt">
+            <p>Try a city you know</p>
+            <div class="city-suggestions" aria-label="Example city searches">
+              <button type="button" data-city="Chennai">Chennai</button>
+              <button type="button" data-city="London">London</button>
+              <button type="button" data-city="Tokyo">Tokyo</button>
+            </div>
+          </div>
+          <div class="loading-current" id="loading-current" aria-hidden="true" hidden>
+            <span class="skeleton skeleton-line"></span>
+            <span class="skeleton skeleton-temp"></span>
+            <span class="skeleton skeleton-line short"></span>
+          </div>
+        </article>
+
+        <aside class="details-panel" aria-label="Weather details">
+          <div class="details-heading">
+            <h2>Today’s details</h2>
+            <span id="updated-time">Local conditions</span>
+          </div>
+          <dl class="detail-list">
+            <div class="detail-item">
+              <dt>Feels like</dt>
+              <dd id="feels-like">--</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Humidity</dt>
+              <dd id="humidity">--</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Wind</dt>
+              <dd id="wind-speed">--</dd>
+            </div>
+            <div class="detail-item">
+              <dt>Pressure</dt>
+              <dd id="pressure">--</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+
+      <section class="forecast-section hourly-section" id="hourly" aria-labelledby="hourly-title" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">The hours ahead</p>
+            <h2 id="hourly-title">Today, hour by hour</h2>
+          </div>
+        </div>
+        <div class="hourly-list" id="hourly-list" aria-live="polite"></div>
+      </section>
+
+      <section class="forecast-section daily-section" id="forecast" aria-labelledby="forecast-title" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Plan a little further ahead</p>
+            <h2 id="forecast-title">The next five days</h2>
+          </div>
+          <p class="section-note" id="forecast-location"></p>
+        </div>
+        <div class="daily-list" id="daily-list" aria-live="polite"></div>
+      </section>
+
+      <section class="empty-forecast" id="forecast-preview" aria-label="Forecast preview">
+        <p class="empty-forecast-title">A little more clarity for whatever’s next.</p>
+        <p>Your hourly and five-day forecasts will appear here after you search.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>SkyCast</span>
+      <span>Weather information provided by OpenWeatherMap</span>
+    </footer>
+  </div>
+</body>
+</html>

@@ -42,7 +42,7 @@ public class Weather {
                 ", temperature=" + temperature +
                 "°C, humidity=" + humidity +
                 "%, windSpeed=" + windSpeed +
-                " km/h, description='" + description + '\'' +
+        " m/s, description='" + description + '\'' +
                 '}';
     }
 }
