@@ -11,6 +11,7 @@ SkyCast is a web-based weather application built using Java that displays curren
 * ☁️ **Weather Icons** – Display weather conditions with corresponding icons.
 * 📱 **Responsive Interface** – Browse a clear dashboard on desktop or mobile, with light and dark appearances.
 * 🎙️ **Voice Weather Assistant** – Search by voice in a supported browser or use Windows speech recognition in the terminal, with spoken weather summaries.
+* 💬 **Local AI Chat** – Chat with Qwen 3.5 through Ollama running on the same device as the website.
 * 🔐 **Environment-Based API Keys** – Keep API keys outside the source code.
 
 ## 🛠️ Technologies Used
@@ -33,6 +34,7 @@ Before running the application, make sure you have:
 * Java Development Kit (JDK) 17
 * Visual Studio Code or another Java-compatible editor
 * An OpenWeatherMap API key
+* [Ollama](https://ollama.com/) with the `qwen3.5:latest` model for the local chat assistant
 * Internet access
 
 ## 📁 Project Structure
@@ -45,6 +47,7 @@ java-mini-project/
 │   ├── WeatherService.java
 │   ├── Forecast.java
 │   ├── WeatherWebServer.java
+│   ├── OllamaService.java
 │   ├── index.html
 │   ├── styles.css
 │   └── app.js
@@ -91,14 +94,31 @@ Open this folder in Visual Studio Code.
 
 Set the OpenWeatherMap API key in the same PowerShell terminal that will run the application.
 
-### Step 4: Compile with Java 17
+### Step 4: Compile and start the browser app with Java 17
+
+From PowerShell, run the following commands (the project folder is named `java-mini-project`; Windows paths are case-insensitive):
 
 ```powershell
-Set-Location .\src
+cd "D:\Git Hub Projects\Java Mini Project\Java-mini-project\src"
 javac *.java
+java --add-modules jdk.httpserver -cp . WeatherWebServer
 ```
 
-### Step 5: Run the Java Terminal Weather App
+Then open **http://localhost:8080**. Keep this terminal open while using the dashboard.
+
+### Step 5: Start Ollama for local chat
+
+Make sure the Qwen model is available:
+
+```powershell
+ollama list
+```
+
+If needed, download it with `ollama pull qwen3.5:latest`. Ollama must be running and listening on its default address, `http://localhost:11434`. If it is not already running, start it in another terminal with `ollama serve`.
+
+Ollama must be running and listening on its default address, `http://127.0.0.1:11434`. If it is not already running, start it in another terminal with `ollama serve`. The server uses `qwen3.5:latest` by default. To use a different installed Ollama model, set `OLLAMA_MODEL` in the same terminal that starts the Java web server.
+
+### Step 6: Run the Java Terminal Weather App
 
 ```powershell
 java Main
@@ -110,23 +130,15 @@ Press Enter at the city prompt to speak a city or ask for its weather. The termi
 
 Run both commands from the `src` directory. No build tool or external JAR is needed.
 
-### Run the Browser Weather Dashboard
-
-To start the existing browser UI after compiling, run:
-
-```powershell
-java --add-modules jdk.httpserver -cp . WeatherWebServer
-```
-
-Keep the terminal open and visit:
-
-**http://localhost:8080**
+Use the **Ask SkyCast** panel to chat with your local Qwen model. After weather loads successfully, SkyCast includes the current conditions and forecast in the chat context, so Qwen can answer questions about the displayed city. Chat messages go through the Java server to Ollama and are not sent to a hosted AI service. For this setup, open the website on the same device where Ollama is running; a public deployment cannot directly access Ollama on your personal computer.
 
 In a browser that supports the Web Speech API, select **Speak**, allow microphone access, and say a city or a request such as “weather in Chennai.” The dashboard reads the current conditions and the next forecast aloud. Browser voice search works on localhost and may require a secure connection and microphone permission.
 
 ## 🌦️ Weather API
 
 The terminal app requests current conditions directly from OpenWeatherMap. The browser server also exposes `/api/weather?city=Chennai` and `/api/forecast?city=Chennai`. Both use `OPENWEATHER_API_KEY`; the key stays on the server and is not sent to the browser.
+
+The browser server exposes `POST /api/chat` for the local assistant. It connects to Ollama at `http://127.0.0.1:11434/api/chat`; set `OLLAMA_MODEL` if your installed model uses a different tag.
 
 ## ⚠️ Troubleshooting
 
@@ -163,6 +175,12 @@ Then start the application again.
 ```text
 http://localhost:8080/api/weather?city=Chennai
 ```
+
+### Local Chat Is Not Responding
+
+* Make sure Ollama is running (`ollama serve` if it is not already running).
+* Run `ollama list` and confirm that `qwen3.5:latest` is installed, or set `OLLAMA_MODEL` to an installed model tag before starting the Java server.
+* The browser, Java server, and Ollama must be on the same device for this local setup.
 
 ## 🔒 Security
 

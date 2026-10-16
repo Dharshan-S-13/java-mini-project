@@ -5,11 +5,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
 
 public class WeatherWebServer {
     private static final int PORT = 8080;
+    private static final int MAX_CHAT_REQUEST_BYTES = 64 * 1024;
     private final WeatherService weatherService = new WeatherService();
+    private final OllamaService ollamaService = new OllamaService();
 
     public static void main(String[] args) throws IOException {
         new WeatherWebServer().start();
@@ -19,8 +23,9 @@ public class WeatherWebServer {
         HttpServer server = HttpServer.create(
                 new InetSocketAddress("127.0.0.1", PORT), 0);
         server.createContext("/", this::handleRequest);
+        server.setExecutor(Executors.newFixedThreadPool(8));
         server.start();
-        System.out.println("SkyCast is running at http://localhost:" + PORT);
+        System.out.println("SkyCast server started on http://localhost:" + PORT);
         System.out.println("Keep this terminal open while using the app.");
     }
 
@@ -29,6 +34,7 @@ public class WeatherWebServer {
         switch (path) {
             case "/api/weather" -> handleWeather(exchange, false);
             case "/api/forecast" -> handleWeather(exchange, true);
+            case "/api/chat" -> handleChat(exchange);
             case "/" -> serveAsset(exchange, "index.html", "text/html; charset=utf-8");
             case "/styles.css" -> serveAsset(exchange, "styles.css", "text/css; charset=utf-8");
             case "/app.js" -> serveAsset(exchange, "app.js", "text/javascript; charset=utf-8");
@@ -80,6 +86,43 @@ public class WeatherWebServer {
         }
 
         send(exchange, 200, "application/json; charset=utf-8", response);
+    }
+
+    private void handleChat(HttpExchange exchange) throws IOException {
+        if (!"POST".equals(exchange.getRequestMethod())) {
+            exchange.getResponseHeaders().set("Allow", "POST");
+            sendError(exchange, 405, "Only POST requests are supported.");
+            return;
+        }
+
+        byte[] requestBytes = exchange.getRequestBody()
+                .readNBytes(MAX_CHAT_REQUEST_BYTES + 1);
+        if (requestBytes.length > MAX_CHAT_REQUEST_BYTES) {
+            sendError(exchange, 413, "Chat message is too long.");
+            return;
+        }
+
+        String conversation = new String(requestBytes, StandardCharsets.UTF_8).trim();
+        if (conversation.isEmpty()) {
+            sendError(exchange, 400, "Enter a message to chat.");
+            return;
+        }
+
+        try {
+            String response = ollamaService.chat(conversation);
+            send(exchange, 200, "application/json; charset=utf-8", response);
+        } catch (HttpTimeoutException e) {
+            sendError(exchange, 504,
+                    "Qwen took too long to respond. Try a shorter message or check Ollama's CPU usage.");
+        } catch (IOException e) {
+            sendError(exchange, 502,
+                    "Could not get a response from Ollama at http://127.0.0.1:11434. "
+                            + "Make sure Ollama is running and the configured model is installed. "
+                            + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            sendError(exchange, 503, "The chat request was interrupted. Please try again.");
+        }
     }
 
     private static String getQueryParameter(HttpExchange exchange, String name) {
@@ -134,9 +177,32 @@ public class WeatherWebServer {
 
     private static void sendError(
             HttpExchange exchange, int status, String message) throws IOException {
-        String escaped = message.replace("\\", "\\\\").replace("\"", "\\\"");
         send(exchange, status, "application/json; charset=utf-8",
-                "{\"error\":\"" + escaped + "\"}");
+                "{\"error\":\"" + escapeJson(message) + "\"}");
+    }
+
+    private static String escapeJson(String value) {
+        StringBuilder escaped = new StringBuilder(value.length() + 16);
+        for (int i = 0; i < value.length(); i++) {
+            char character = value.charAt(i);
+            switch (character) {
+                case '"' -> escaped.append("\\\"");
+                case '\\' -> escaped.append("\\\\");
+                case '\b' -> escaped.append("\\b");
+                case '\f' -> escaped.append("\\f");
+                case '\n' -> escaped.append("\\n");
+                case '\r' -> escaped.append("\\r");
+                case '\t' -> escaped.append("\\t");
+                default -> {
+                    if (character < 0x20) {
+                        escaped.append(String.format("\\u%04x", (int) character));
+                    } else {
+                        escaped.append(character);
+                    }
+                }
+            }
+        }
+        return escaped.toString();
     }
 
     private static void send(

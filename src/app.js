@@ -14,12 +14,18 @@ const dailySection = document.querySelector("#forecast");
 const forecastLink = document.querySelector("#forecast-nav");
 const themeToggle = document.querySelector("#theme-toggle");
 const currentIcon = document.querySelector("#current-icon");
+const chatForm = document.querySelector("#chat-form");
+const chatInput = document.querySelector("#chat-input");
+const chatSend = document.querySelector("#chat-send");
+const chatMessages = document.querySelector("#chat-messages");
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 let activeRequest;
 let recognition;
 let isListening = false;
 let speechError = false;
+const chatHistory = [];
+let liveWeatherContext = "";
 
 function setText(selector, text) {
   document.querySelector(selector).textContent = text;
@@ -235,6 +241,31 @@ function renderDailyForecast(forecast, weather) {
   dailySection.hidden = days.length === 0;
 }
 
+function makeWeatherChatContext(weather, forecast) {
+  const condition = weather.weather?.[0]?.description || "unavailable";
+  const country = weather.sys?.country ? `, ${weather.sys.country}` : "";
+  const days = makeDailyForecast(forecast, weather);
+
+  return [
+    "CURRENT SKYCAST WEATHER DATA from OpenWeatherMap:",
+    `Location: ${weather.name || "Unknown"}${country}.`,
+    `Updated: ${cityDate(weather.dt, weather.timezone || 0, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    })}.`,
+    `Current conditions: ${Math.round(weather.main.temp)}°C, ${condition}; feels like ${Math.round(weather.main.feels_like)}°C.`,
+    `Humidity: ${Math.round(weather.main.humidity)}%. Wind: ${Number(weather.wind.speed).toFixed(1)} m/s. Pressure: ${weather.main.pressure} hPa.`,
+    "Forecast:",
+    ...days.map((day) =>
+      `${day.label} (${day.date}): ${day.condition?.description || "conditions unavailable"}, high ${day.high}°C, low ${day.low}°C, precipitation ${day.precipitation}%.`,
+    ),
+    "Use this latest data to answer questions about the weather. Do not claim you lack live weather data when this context is present. Do not invent values that are not listed.",
+  ].join("\n");
+}
+
 function speakWeather(weather, forecast) {
   if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") {
     return false;
@@ -282,6 +313,7 @@ async function loadCity(city, { speak = false } = {}) {
     updateCurrentWeather(weather);
     renderHourlyForecast(forecast, weather);
     renderDailyForecast(forecast, weather);
+    liveWeatherContext = makeWeatherChatContext(weather, forecast);
     if (dailySection.hidden) {
       if (emptyForecastTitle) emptyForecastTitle.textContent = "No forecast is available right now.";
       if (emptyForecastMessage) emptyForecastMessage.textContent = "Try another city or check again later.";
@@ -422,3 +454,67 @@ themeToggle.addEventListener("click", () => {
 
 cityInput.value = "Chennai";
 loadCity(cityInput.value);
+
+function addChatMessage(role, text, extraClass = "") {
+  const message = document.createElement("p");
+  message.className = `chat-message ${role}${extraClass ? ` ${extraClass}` : ""}`;
+  message.textContent = text;
+  chatMessages.append(message);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return message;
+}
+
+chatForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const message = chatInput.value.trim();
+  if (!message || chatSend.disabled) {
+    return;
+  }
+
+  addChatMessage("user", message);
+  chatInput.value = "";
+  chatInput.disabled = true;
+  chatSend.disabled = true;
+  chatSend.textContent = "Thinking…";
+  const thinkingMessage = addChatMessage("assistant", "Thinking…", "thinking");
+  const transcript = [
+    liveWeatherContext,
+    ...chatHistory.map((turn) => `${turn.role === "user" ? "User" : "Assistant"}: ${turn.content}`),
+    `User: ${message}`,
+  ].filter(Boolean)
+    .join("\n\n");
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain; charset=utf-8", Accept: "application/json" },
+      body: transcript,
+    });
+    const payload = await readResponse(response);
+    if (typeof payload.message?.content !== "string") {
+      throw new Error("Ollama returned an unexpected response. Check the server logs and try again.");
+    }
+
+    const reply = payload.message.content.trim();
+    if (!reply) {
+      throw new Error("Qwen returned an empty response. Please try again.");
+    }
+    thinkingMessage.textContent = reply;
+    thinkingMessage.classList.remove("thinking");
+    chatHistory.push({ role: "user", content: message }, { role: "assistant", content: reply });
+    if (chatHistory.length > 12) {
+      chatHistory.splice(0, chatHistory.length - 12);
+    }
+  } catch (error) {
+    thinkingMessage.textContent = error instanceof TypeError
+      ? "Could not reach the local chat service. Make sure the SkyCast server is running."
+      : error.message;
+    thinkingMessage.classList.remove("thinking");
+    thinkingMessage.classList.add("error");
+  } finally {
+    chatInput.disabled = false;
+    chatSend.disabled = false;
+    chatSend.textContent = "Send";
+    chatInput.focus();
+  }
+});
