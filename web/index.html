@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#07152f">
+    <title>SkyCast | Weather Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <a class="brand" href="/">
+                <span class="brand-icon">☀</span>
+                <span>SkyCast</span>
+            </a>
+            <span class="live-label"><span class="live-dot"></span> WEATHER DASHBOARD</span>
+        </header>
+
+        <main>
+            <section class="welcome">
+                <p class="eyebrow">YOUR PERSONAL WEATHER REPORT</p>
+                <h1>Weather, at a glance.</h1>
+                <p class="subtitle">Current conditions and your five-day temperature outlook.</p>
+            </section>
+
+            <form id="search-form" class="search-form">
+                <span class="search-icon">⌕</span>
+                <input
+                    id="city-input"
+                    type="text"
+                    placeholder="Enter a city, e.g. Chennai"
+                    value="Chennai"
+                    aria-label="City name"
+                    maxlength="100"
+                    required
+                >
+                <button id="search-button" type="submit">Search <span>→</span></button>
+            </form>
+
+            <p id="status" class="status" role="status">Loading weather...</p>
+
+            <section id="weather-content" class="hidden">
+                <section class="current-card">
+                    <div class="current-main">
+                        <div>
+                            <p class="eyebrow">CURRENT WEATHER</p>
+                            <h2 id="city-name">Chennai</h2>
+                            <p id="current-date" class="muted"></p>
+                            <p id="description" class="condition">Weather conditions</p>
+                            <div class="temperature">
+                                <span id="current-temp">--</span><span class="degree">°C</span>
+                            </div>
+                            <p class="feels">Feels like <strong id="feels-like">--°C</strong></p>
+                        </div>
+                        <div class="sun-illustration" aria-hidden="true">☀️</div>
+                    </div>
+
+                    <div class="weather-stats">
+                        <article class="stat">
+                            <span class="stat-icon">🌡️</span>
+                            <div>
+                                <p>Feels like</p>
+                                <strong id="stat-feels">--°C</strong>
+                            </div>
+                        </article>
+                        <article class="stat">
+                            <span class="stat-icon">💧</span>
+                            <div>
+                                <p>Humidity</p>
+                                <strong id="humidity">--%</strong>
+                            </div>
+                        </article>
+                        <article class="stat">
+                            <span class="stat-icon">💨</span>
+                            <div>
+                                <p>Wind speed</p>
+                                <strong id="wind-speed">-- m/s</strong>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="section">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">THROUGH THE DAY</p>
+                            <h2>Today's temperatures</h2>
+                        </div>
+                        <span class="section-note">Available 3-hour forecasts</span>
+                    </div>
+                    <div id="today-list" class="today-grid"></div>
+                    <p id="today-empty" class="empty hidden">
+                        No forecast readings are available for today.
+                    </p>
+                </section>
+
+                <section class="section">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">PLAN AHEAD</p>
+                            <h2>Next 5 days</h2>
+                        </div>
+                        <span class="section-note">Daily average temperature</span>
+                    </div>
+                    <div id="daily-list" class="daily-grid"></div>
+                </section>
+
+                <p class="disclaimer">
+                    Forecast averages are calculated from available forecast readings.
+                    They are estimates, not actual recorded daily averages.
+                </p>
+
+            </section>
+
+            <section class="chat-card" aria-labelledby="chat-title">
+                <div class="chat-heading">
+                    <div>
+                        <p class="eyebrow">YOUR WEATHER ASSISTANT</p>
+                        <h2 id="chat-title">Ask SkyCast AI</h2>
+                    </div>
+                    <span class="chat-badge"><span class="live-dot"></span> GEMINI AI</span>
+                </div>
+                <div id="chat-messages" class="chat-messages" role="log"
+                     aria-live="polite" aria-relevant="additions text">
+                    <p class="chat-message assistant-message">
+                        <span class="message-label">SkyCast AI</span>
+                        Hi! Ask me about the weather or how to plan for the conditions.
+                    </p>
+                </div>
+                <form id="chat-form" class="chat-form">
+                    <label class="visually-hidden" for="chat-input">Your message</label>
+                    <input id="chat-input" type="text"
+                           placeholder="Ask about the weather..."
+                           maxlength="2000" autocomplete="off" required>
+                    <button id="chat-send" type="submit">
+                        Send <span aria-hidden="true">→</span>
+                    </button>
+                </form>
+                <p id="chat-status" class="chat-status" role="status"></p>
+            </section>
+        </main>
+
+        <footer>
+            <span>SkyCast Weather</span>
+            <span>Powered by OpenWeatherMap · Built with Java Stream API</span>
+        </footer>
+    </div>
+</body>
+</html>
