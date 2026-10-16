@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f7f8">
   <meta name="description" content="A clear, calm view of current weather and the five-day forecast.">
-  <title>SkyCast | Weather at a glance</title>
+  <title>VaanilAI | Weather at a glance</title>
   <link rel="preconnect" href="https://openweathermap.org">
   <link rel="stylesheet" href="/styles.css">
   <script src="/app.js" defer></script>
@@ -13,9 +13,9 @@
 <body>
   <div class="page-shell">
     <header class="site-header">
-      <a class="brand" href="/" aria-label="SkyCast home">
+      <a class="brand" href="/" aria-label="VaanilAI home">
         <span class="brand-mark" aria-hidden="true"><span></span></span>
-        <span>skycast</span>
+        <span>Vaanil<span class="brand-ai">AI</span></span>
       </a>
       <nav class="site-nav" aria-label="Main navigation">
         <a class="nav-link active" href="#today">Today</a>
@@ -137,10 +137,31 @@
         <p class="empty-forecast-title">A little more clarity for whatever’s next.</p>
         <p>Your hourly and five-day forecasts will appear here after you search.</p>
       </section>
+
+      <section class="chat-section" aria-labelledby="chat-title">
+        <div class="chat-heading">
+          <div>
+            <p class="eyebrow">Your local AI assistant</p>
+            <h2 id="chat-title">Ask VaanilAI</h2>
+          </div>
+          <span class="chat-model">Ollama · Qwen 3.5</span>
+        </div>
+        <div class="chat-messages" id="chat-messages" role="log" aria-live="polite"
+             aria-relevant="additions text">
+          <p class="chat-welcome">Ask a question and chat with Qwen running on your device.</p>
+        </div>
+        <form class="chat-form" id="chat-form">
+          <label class="visually-hidden" for="chat-input">Message the VaanilAI assistant</label>
+          <input id="chat-input" name="message" type="text" maxlength="4000"
+                 placeholder="Ask me anything…" autocomplete="off" required>
+          <button class="search-button" id="chat-send" type="submit">Send</button>
+        </form>
+        <p class="chat-note">Messages are sent to Ollama on this device. Start Ollama before chatting.</p>
+      </section>
     </main>
 
     <footer class="site-footer">
-      <span>SkyCast</span>
+      <span>Vaanil<span class="brand-ai">AI</span></span>
       <span>Weather information provided by OpenWeatherMap</span>
     </footer>
   </div>

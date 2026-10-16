@@ -1,191 +1,161 @@
-# 🌦️ SkyCast – Real-Time Weather Application Using Java Stream API
+# VaanilAI
 
-SkyCast is a web-based weather application built using Java that displays current conditions, an hourly outlook, and a five-day forecast for a searched city. It uses the OpenWeatherMap API to retrieve weather data and serves a responsive browser interface from a lightweight Java web server.
+VaanilAI is a weather dashboard built with React and Vite, backed by a Java 17 Spring Boot API built with Gradle. The backend retrieves weather from OpenWeatherMap and sends AI chat requests to a local Ollama Qwen 3.5 model. The browser communicates only with Spring Boot; it never receives the OpenWeatherMap key or calls Ollama directly.
 
-## ✨ Features
+## Architecture
 
-* 🌍 **City-Based Weather Search** – Search for weather information by city name.
-* 🌡️ **Current Weather** – View temperature, feels-like temperature, humidity, wind speed, and atmospheric pressure.
-* 🕒 **Today's Forecast** – View available three-hour temperature forecasts.
-* 📅 **Five-Day Forecast** – View daily high and low temperatures and precipitation chances.
-* ☁️ **Weather Icons** – Display weather conditions with corresponding icons.
-* 📱 **Responsive Interface** – Browse a clear dashboard on desktop or mobile, with light and dark appearances.
-* 🎙️ **Voice Weather Assistant** – Search by voice in a supported browser or use Windows speech recognition in the terminal, with spoken weather summaries.
-* 🔐 **Environment-Based API Keys** – Keep API keys outside the source code.
+```text
+React + Vite (http://localhost:5173)
+    |
+    | HTTP/JSON
+    v
+Spring Boot + Java 17 + Gradle (http://localhost:8080)
+    |                                  |
+    v                                  v
+OpenWeatherMap                   Ollama + Qwen 3.5
+                                  (http://127.0.0.1:11434)
+```
 
-## 🛠️ Technologies Used
+## Requirements
 
-* Java 17
-* Java Stream API
-* Java HTTP Client
-* Java `HttpServer`
-* HTML5
-* CSS3
-* JavaScript
-* OpenWeatherMap API
-* Visual Studio Code
-* Git and GitHub
+- Java Development Kit (JDK) 17
+- Node.js 18 or later and npm
+- Ollama, with `qwen3.5:latest` installed for AI chat
+- An OpenWeatherMap API key for live weather
 
-## 📋 Prerequisites
+The Gradle Wrapper is included, so a global Gradle installation is not required. Verify the installed tools:
 
-Before running the application, make sure you have:
+```powershell
+java -version
+node --version
+npm --version
+ollama list
+```
 
-* Java Development Kit (JDK) 17
-* Visual Studio Code or another Java-compatible editor
-* An OpenWeatherMap API key
-* Internet access
-
-## 📁 Project Structure
+## Project structure
 
 ```text
 java-mini-project/
-├── src/
-│   ├── Main.java
-│   ├── Weather.java
-│   ├── WeatherService.java
-│   ├── Forecast.java
-│   ├── WeatherWebServer.java
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
-└── README.md
+├── .env                         # Local backend secrets; ignored by Git
+├── skycast/
+│   ├── backend/
+│   │   ├── gradlew
+│   │   ├── gradlew.bat
+│   │   ├── gradle/wrapper/
+│   │   ├── build.gradle
+│   │   ├── settings.gradle
+│   │   └── src/main/
+│   └── frontend/
+│       ├── .env.example
+│       ├── package.json
+│       ├── index.html
+│       └── src/
+│           ├── components/
+│           ├── services/
+│           ├── styles/
+│           ├── App.jsx
+│           └── main.jsx
+├── backend/                     # Earlier Gradle build retained
+├── frontend/                    # Previous frontend retained
+└── src/                         # Original Java/web application retained
 ```
 
-## 🔑 API Configuration
+`skycast/backend` and `skycast/frontend` are the active VaanilAI application. The earlier project files are retained separately and are not needed to run the active app.
 
-### 1. OpenWeatherMap API
+## Environment variables
 
-Obtain an API key from [OpenWeatherMap](https://openweathermap.org/api).
+The backend reads `OPENWEATHER_API_KEY` from its process environment or from the repository-root `.env` file. Keep the key on the backend only; do not put it in a frontend `.env` file or commit it.
 
-Create a `.env` file in the project root (next to this README) with:
+Create or update `.env` in the repository root:
 
 ```text
-OPENWEATHER_API_KEY=YOUR_OPENWEATHER_API_KEY
+OPENWEATHER_API_KEY=your_openweathermap_api_key
 ```
 
-Replace the placeholder with your actual key. `.env` is excluded by `.gitignore`; never commit API keys to GitHub. The application checks the `OPENWEATHER_API_KEY` environment variable first, then reads the ignored project-root `.env` file.
-
-Alternatively, configure the key in PowerShell for the current session:
+Alternatively, set the variable in the PowerShell session used to start the backend:
 
 ```powershell
-$env:OPENWEATHER_API_KEY = "YOUR_OPENWEATHER_API_KEY"
+$env:OPENWEATHER_API_KEY = "your_openweathermap_api_key"
 ```
 
-## ▶️ How to Run the Project
+Ollama defaults to `http://127.0.0.1:11434` and `qwen3.5:latest`. Optional backend-process overrides are `OLLAMA_URL` and `OLLAMA_MODEL`.
 
-### Step 1: Clone the Repository
+The frontend uses `VITE_API_BASE_URL=http://localhost:8080`. This value is not a secret. The provided `skycast/frontend/.env.example` contains only this setting; copy it to `skycast/frontend/.env.local` to override the API URL for local development.
+
+## Backend setup (Terminal 1)
+
+From the repository root:
 
 ```powershell
-git clone https://github.com/balajiads/java-mini-project.git
+cd skycast/backend
+.\gradlew.bat clean build
+.\gradlew.bat bootRun
 ```
 
-### Step 2: Open the Project
+The backend listens on `http://localhost:8080`. Its Gradle Wrapper downloads the configured Gradle distribution on first use. The root `.env` is discovered when the backend runs from `skycast/backend`.
+
+## Frontend setup (Terminal 2)
+
+Open another PowerShell terminal from the repository root:
 
 ```powershell
-cd java-mini-project
+cd skycast/frontend
+npm install
+npm run dev
 ```
 
-Open this folder in Visual Studio Code.
+Open `http://localhost:5173`. Create the optional `.env.local` only when changing `VITE_API_BASE_URL`; do not put backend credentials there.
 
-### Step 3: Configure API Keys
+## Ollama setup (Terminal 3)
 
-Set the OpenWeatherMap API key in the same PowerShell terminal that will run the application.
-
-### Step 4: Compile with Java 17
+In a third terminal, check the Ollama service and installed models:
 
 ```powershell
-Set-Location .\src
-javac *.java
+ollama list
 ```
 
-### Step 5: Run the Java Terminal Weather App
+If `qwen3.5:latest` is missing, install it:
 
 ```powershell
-java Main
+ollama pull qwen3.5:latest
 ```
 
-Enter a city name when prompted. The app prints current conditions, temperature, humidity, and wind speed.
+Ollama Desktop normally starts its local service automatically. Do not run `ollama serve` if Ollama is already running. Chat requires Ollama; weather search does not.
 
-Press Enter at the city prompt to speak a city or ask for its weather. The terminal voice assistant uses Windows PowerShell and the built-in `System.Speech` service. A microphone and an installed Windows speech recognizer are required; if voice input is unavailable, type a city when prompted.
+## API endpoints
 
-Run both commands from the `src` directory. No build tool or external JAR is needed.
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/weather?city=Chennai` | Current conditions |
+| `GET` | `/api/forecast?city=Chennai` | Three-hour forecast entries used by the hourly and five-day views |
+| `POST` | `/api/chat` | Ollama chat, optionally with verified weather context |
 
-### Run the Browser Weather Dashboard
+Example chat request:
 
-To start the existing browser UI after compiling, run:
-
-```powershell
-java --add-modules jdk.httpserver -cp . WeatherWebServer
+```json
+{
+  "message": "Should I carry an umbrella?",
+  "city": "Chennai",
+  "history": []
+}
 ```
 
-Keep the terminal open and visit:
+The APIs return JSON errors with an appropriate HTTP status. The OpenWeatherMap key is never included in API responses.
 
-**http://localhost:8080**
+## Troubleshooting
 
-In a browser that supports the Web Speech API, select **Speak**, allow microphone access, and say a city or a request such as “weather in Chennai.” The dashboard reads the current conditions and the next forecast aloud. Browser voice search works on localhost and may require a secure connection and microphone permission.
+- **Java version or Gradle build error:** install JDK 17 and run `.\gradlew.bat clean build` from `skycast/backend`. A global Gradle install is not required.
+- **Weather is not configured:** set `OPENWEATHER_API_KEY` in the repository-root `.env` or in the backend process environment, then restart Spring Boot.
+- **City not found:** check the spelling or try a city supported by OpenWeatherMap.
+- **Weather provider/network error:** check internet connectivity, the OpenWeatherMap key, and the provider's availability. The frontend displays the backend's returned error message.
+- **Frontend cannot reach the backend:** confirm Spring Boot is listening on port 8080 and the Vite origin is `http://localhost:5173`, which is allowed by the backend CORS configuration.
+- **Ollama unavailable:** check `ollama list` and confirm the existing local Ollama service is running. Do not start a duplicate server.
+- **Qwen model missing:** run `ollama pull qwen3.5:latest`, or set `OLLAMA_MODEL` to an installed model.
+- **Voice input unavailable:** allow microphone access and use a browser supporting `SpeechRecognition` or `webkitSpeechRecognition`; typed search remains available.
+- **Text-to-speech unavailable:** use a browser/OS that provides `window.speechSynthesis`; weather data and chat still work.
+- **Port already in use:** inspect the listener before stopping any process:
 
-## 🌦️ Weather API
-
-The terminal app requests current conditions directly from OpenWeatherMap. The browser server also exposes `/api/weather?city=Chennai` and `/api/forecast?city=Chennai`. Both use `OPENWEATHER_API_KEY`; the key stays on the server and is not sent to the browser.
-
-## ⚠️ Troubleshooting
-
-### Port 8080 Is Already in Use
-
-Check the process using port 8080:
-
-```powershell
-Get-NetTCPConnection -LocalPort 8080 -State Listen
-```
-
-Check the process ID shown under `OwningProcess`:
-
-```powershell
-Get-Process -Id YOUR_PID
-```
-
-If you confirm it is your previous Java weather server, stop it:
-
-```powershell
-Stop-Process -Id YOUR_PID -Force
-```
-
-Then start the application again.
-
-### Weather Data Is Not Loading
-
-* Verify that `OPENWEATHER_API_KEY` is configured.
-* Check your internet connection.
-* Check the server terminal for error messages.
-* Confirm that the OpenWeatherMap API key has access to the requested endpoints.
-* Test the weather endpoint directly:
-
-```text
-http://localhost:8080/api/weather?city=Chennai
-```
-
-## 🔒 Security
-
-* Do not hardcode API keys in Java or HTML files.
-* Do not upload API keys to GitHub.
-* Use environment variables to configure credentials.
-* If a key is accidentally exposed, revoke it and generate a replacement.
-
-## 🚀 Future Enhancements
-
-* Automatic location-based weather
-* Weather alerts and notifications
-* Weather data visualization and charts
-* Unit conversion between Celsius and Fahrenheit
-* More detailed forecast analytics
-* Automated tests
-
-## 👨‍💻 Author
-
-**Balaji**
-
-GitHub: [balajiads](https://github.com/balajiads)
-
-## 📄 License
-
-This project is intended for learning and educational purposes. Add a license file if you want to specify the terms under which others may use or distribute the project.
+  ```powershell
+  Get-NetTCPConnection -LocalPort 8080 -State Listen
+  Get-NetTCPConnection -LocalPort 5173 -State Listen
+  ```

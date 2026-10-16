@@ -3,3 +3,12 @@
 .env
 .env.txt
 *.env*
+!skycast/frontend/.env.example
+node_modules/
+frontend/dist/
+skycast/frontend/dist/
+backend/.gradle/
+backend/build/
+backend/target/
+skycast/backend/.gradle/
+skycast/backend/build/
