@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OllamaService {
     private static final String SYSTEM_PROMPT =
-            "You are SkyCast's helpful weather assistant. Use only supplied verified weather data for current conditions and forecasts. "
+            "You are VaanilAI's helpful weather assistant. Use only supplied verified weather data for current conditions and forecasts. "
                     + "Never invent weather information. If verified weather data is absent, say you cannot verify current conditions.";
 
     private final WeatherService weatherService;

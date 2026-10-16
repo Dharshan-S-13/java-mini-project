@@ -247,7 +247,7 @@ function makeWeatherChatContext(weather, forecast) {
   const days = makeDailyForecast(forecast, weather);
 
   return [
-    "CURRENT SKYCAST WEATHER DATA from OpenWeatherMap:",
+    "CURRENT VAANILAI WEATHER DATA from OpenWeatherMap:",
     `Location: ${weather.name || "Unknown"}${country}.`,
     `Updated: ${cityDate(weather.dt, weather.timezone || 0, {
       weekday: "long",
@@ -507,7 +507,7 @@ chatForm.addEventListener("submit", async (event) => {
     }
   } catch (error) {
     thinkingMessage.textContent = error instanceof TypeError
-      ? "Could not reach the local chat service. Make sure the SkyCast server is running."
+      ? "Could not reach the local chat service. Make sure the VaanilAI server is running."
       : error.message;
     thinkingMessage.classList.remove("thinking");
     thinkingMessage.classList.add("error");

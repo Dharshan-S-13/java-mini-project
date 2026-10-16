@@ -11,7 +11,7 @@ async function requestWeather(path, city, signal) {
     });
   } catch (error) {
     if (error.name === "AbortError") throw error;
-    throw new Error("Could not reach the SkyCast backend. Check that it is running.");
+    throw new Error("Could not reach the VaanilAI backend. Check that it is running.");
   }
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {

@@ -1,3 +1,4 @@
 package com.skycast.model;
 
-public record ChatResponse(String reply) { }
+public record ChatResponse(String message) {
+}

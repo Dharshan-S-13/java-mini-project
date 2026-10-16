@@ -118,6 +118,11 @@ input:focus-visible {
   text-decoration: none;
 }
 
+.brand-ai {
+  color: var(--accent);
+  font-weight: 800;
+}
+
 .brand-mark {
   width: 27px;
   height: 27px;

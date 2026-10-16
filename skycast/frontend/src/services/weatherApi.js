@@ -1,10 +1,29 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8080").replace(/\/+$/, "");
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8080")
+  .replace(/\/+$/, "");
 
-async function request(path, city) {
-  const res = await fetch(`${API_BASE_URL}${path}?city=${encodeURIComponent(city)}`);
-  if (!res.ok) throw new Error("Backend error");
-  return res.json();
+async function requestWeather(path, city, signal) {
+  const url = `${API_BASE_URL}${path}?city=${encodeURIComponent(city)}`;
+  let response;
+  try {
+    response = await fetch(url, {
+      signal,
+      headers: { Accept: "application/json" },
+    });
+  } catch (error) {
+    if (error.name === "AbortError") throw error;
+    throw new Error("Could not reach the VaanilAI backend. Check that it is running.");
+  }
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || "Weather data could not be loaded.");
+  }
+  return payload;
 }
 
-export function getWeather(city) { return request('/api/weather', city); }
-export function getForecast(city) { return request('/api/forecast', city); }
+export function getWeather(city, signal) {
+  return requestWeather("/api/weather", city, signal);
+}
+
+export function getForecast(city, signal) {
+  return requestWeather("/api/forecast", city, signal);
+}

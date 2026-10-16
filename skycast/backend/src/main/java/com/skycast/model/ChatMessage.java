@@ -1,3 +1,4 @@
 package com.skycast.model;
 
-public record ChatMessage(String role, String content) { }
+public record ChatMessage(String role, String content) {
+}

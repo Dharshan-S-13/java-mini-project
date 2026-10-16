@@ -25,7 +25,7 @@ public class WeatherWebServer {
         server.createContext("/", this::handleRequest);
         server.setExecutor(Executors.newFixedThreadPool(8));
         server.start();
-        System.out.println("SkyCast server started on http://localhost:" + PORT);
+        System.out.println("VaanilAI server started on http://localhost:" + PORT);
         System.out.println("Keep this terminal open while using the app.");
     }
 

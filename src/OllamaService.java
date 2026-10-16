@@ -10,8 +10,8 @@ public class OllamaService {
     private static final String API_URL = "http://127.0.0.1:11434/api/chat";
     private static final String DEFAULT_MODEL = "qwen3.5:latest";
     private static final String SYSTEM_PROMPT =
-            "You are SkyCast's helpful website assistant. Be clear, friendly, and concise. "
-                    + "When the conversation includes CURRENT SKYCAST WEATHER DATA, use those "
+            "You are VaanilAI's helpful website assistant. Be clear, friendly, and concise. "
+                    + "When the conversation includes CURRENT VAANILAI WEATHER DATA, use those "
                     + "values to answer current-weather and forecast questions, and do not say "
                     + "you lack live weather access. The supplied data is authoritative for "
                     + "this conversation. Never invent weather values that are not supplied.";

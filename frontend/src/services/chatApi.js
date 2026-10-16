@@ -13,12 +13,12 @@ export async function sendChat(message, city, history) {
       body: JSON.stringify({ message, city, history }),
     });
   } catch {
-    throw new Error("Could not reach the SkyCast backend. Check that it is running.");
+    throw new Error("Could not reach the VaanilAI backend. Check that it is running.");
   }
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload.error || "The SkyCast assistant could not respond.");
+    throw new Error(payload.error || "The VaanilAI assistant could not respond.");
   }
   if (typeof payload.message !== "string" || !payload.message.trim()) {
     throw new Error("Ollama returned an unexpected or empty response.");

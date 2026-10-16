@@ -41,7 +41,7 @@ export default function AIChat({ city }) {
   return (
     <section className="chat-section" aria-labelledby="chat-title">
       <div className="chat-heading">
-        <div><p className="eyebrow">Your local AI assistant</p><h2 id="chat-title">Ask SkyCast</h2></div>
+        <div><p className="eyebrow">Your local AI assistant</p><h2 id="chat-title">Ask VaanilAI</h2></div>
         <span className="chat-model">Ollama · Qwen 3.5</span>
       </div>
       <div className="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-relevant="additions text">
@@ -60,7 +60,7 @@ export default function AIChat({ city }) {
         ))}
       </div>
       <form className="chat-form" onSubmit={submit}>
-        <label className="visually-hidden" htmlFor="chat-input">Message the SkyCast assistant</label>
+        <label className="visually-hidden" htmlFor="chat-input">Message the VaanilAI assistant</label>
         <input
           id="chat-input"
           name="message"

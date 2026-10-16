@@ -92,8 +92,9 @@ export default function App() {
   return (
     <div className="page-shell">
       <header className="site-header">
-        <a className="brand" href="/" aria-label="SkyCast home">
-          <span className="brand-mark" aria-hidden="true"><span /></span><span>skycast</span>
+        <a className="brand" href="/" aria-label="VaanilAI home">
+          <span className="brand-mark" aria-hidden="true"><span /></span>
+          <span className="brand-wordmark">Vaanil<span className="brand-ai">AI</span></span>
         </a>
         <nav className="site-nav" aria-label="Main navigation">
           <a className="nav-link active" href="#today">Today</a>
@@ -142,7 +143,8 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <span>SkyCast</span><span>Weather information provided by OpenWeatherMap</span>
+        <span className="brand-wordmark">Vaanil<span className="brand-ai">AI</span></span>
+        <span>Weather information provided by OpenWeatherMap</span>
       </footer>
     </div>
   );
