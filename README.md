@@ -1,209 +1,174 @@
-# 🌦️ SkyCast – Real-Time Weather Application Using Java Stream API
+# SkyCast
 
-SkyCast is a web-based weather application built using Java that displays current conditions, an hourly outlook, and a five-day forecast for a searched city. It uses the OpenWeatherMap API to retrieve weather data and serves a responsive browser interface from a lightweight Java web server.
+SkyCast is a weather dashboard with a React + Vite frontend and a Java 17 Spring Boot backend. The backend retrieves weather information from OpenWeatherMap and routes AI chat through a local Ollama installation. The browser never receives the OpenWeatherMap API key.
 
-## ✨ Features
+## Architecture
 
-* 🌍 **City-Based Weather Search** – Search for weather information by city name.
-* 🌡️ **Current Weather** – View temperature, feels-like temperature, humidity, wind speed, and atmospheric pressure.
-* 🕒 **Today's Forecast** – View available three-hour temperature forecasts.
-* 📅 **Five-Day Forecast** – View daily high and low temperatures and precipitation chances.
-* ☁️ **Weather Icons** – Display weather conditions with corresponding icons.
-* 📱 **Responsive Interface** – Browse a clear dashboard on desktop or mobile, with light and dark appearances.
-* 🎙️ **Voice Weather Assistant** – Search by voice in a supported browser or use Windows speech recognition in the terminal, with spoken weather summaries.
-* 💬 **Local AI Chat** – Chat with Qwen 3.5 through Ollama running on the same device as the website.
-* 🔐 **Environment-Based API Keys** – Keep API keys outside the source code.
+```text
+React + Vite (http://localhost:5173)
+    | HTTP/JSON
+Spring Boot API (http://localhost:8080)
+    |                  |
+OpenWeatherMap      Ollama (http://127.0.0.1:11434)
+                       Qwen 3.5
+```
 
-## 🛠️ Technologies Used
+The UI keeps the original SkyCast visual design, weather details, hourly and five-day forecast, appearance toggle, voice search, text-to-speech, and chat. Browser speech uses the built-in Web Speech API; no paid speech service is used.
 
-* Java 17
-* Java Stream API
-* Java HTTP Client
-* Java `HttpServer`
-* HTML5
-* CSS3
-* JavaScript
-* OpenWeatherMap API
-* Visual Studio Code
-* Git and GitHub
-
-## 📋 Prerequisites
-
-Before running the application, make sure you have:
-
-* Java Development Kit (JDK) 17
-* Visual Studio Code or another Java-compatible editor
-* An OpenWeatherMap API key
-* [Ollama](https://ollama.com/) with the `qwen3.5:latest` model for the local chat assistant
-* Internet access
-
-## 📁 Project Structure
+## Project structure
 
 ```text
 java-mini-project/
-├── src/
-│   ├── Main.java
-│   ├── Weather.java
-│   ├── WeatherService.java
-│   ├── Forecast.java
-│   ├── WeatherWebServer.java
-│   ├── OllamaService.java
+├── backend/
+│   ├── pom.xml
+│   └── src/main/java/com/skycast/
+│       ├── SkyCastApplication.java
+│       ├── config/
+│       ├── controller/
+│       ├── model/
+│       └── service/
+├── frontend/
+│   ├── .env.example
 │   ├── index.html
-│   ├── styles.css
-│   └── app.js
+│   ├── package.json
+│   ├── vite.config.js
+│   └── src/
+│       ├── components/
+│       ├── services/
+│       ├── styles/skycast.css
+│       ├── App.jsx
+│       └── main.jsx
+├── src/                  # Original Java and web app retained
+├── .env                  # Local secrets; ignored by Git
 └── README.md
 ```
 
-## 🔑 API Configuration
+## Requirements
 
-### 1. OpenWeatherMap API
+- Java Development Kit (JDK) 17
+- Apache Maven 3.6.3 or later
+- Node.js 18 or later and npm
+- An OpenWeatherMap API key
+- Ollama installed locally and the `qwen3.5:latest` model (for chat)
 
-Obtain an API key from [OpenWeatherMap](https://openweathermap.org/api).
+Install Java, Node.js, Maven, and Ollama using their official installers for Windows. Verify the tools in PowerShell:
 
-Create a `.env` file in the project root (next to this README) with:
+```powershell
+java -version
+mvn -version
+node --version
+npm --version
+ollama list
+```
+
+## Environment variables
+
+The backend reads `OPENWEATHER_API_KEY` from the process environment or the project-root `.env` file. The frontend does not receive or read that secret. The existing `.env` file is excluded from Git; keep it private and do not paste its contents into issue reports.
+
+Example `.env` in the project root:
 
 ```text
-OPENWEATHER_API_KEY=YOUR_OPENWEATHER_API_KEY
+OPENWEATHER_API_KEY=your_openweathermap_api_key
 ```
 
-Replace the placeholder with your actual key. `.env` is excluded by `.gitignore`; never commit API keys to GitHub. The application checks the `OPENWEATHER_API_KEY` environment variable first, then reads the ignored project-root `.env` file.
-
-Alternatively, configure the key in PowerShell for the current session:
+Alternatively, set it in the PowerShell session used to launch the backend:
 
 ```powershell
-$env:OPENWEATHER_API_KEY = "YOUR_OPENWEATHER_API_KEY"
+$env:OPENWEATHER_API_KEY = "your_openweathermap_api_key"
 ```
 
-## ▶️ How to Run the Project
-
-### Step 1: Clone the Repository
+Chat defaults to `qwen3.5:latest` at `http://127.0.0.1:11434`. Optional overrides for the backend process:
 
 ```powershell
-git clone https://github.com/balajiads/java-mini-project.git
+$env:OLLAMA_MODEL = "qwen3.5:latest"
+$env:OLLAMA_URL = "http://127.0.0.1:11434"
 ```
 
-### Step 2: Open the Project
+The frontend API base URL defaults to `http://localhost:8080`. To change it for Vite development, copy `frontend/.env.example` to `frontend/.env.local` and update `VITE_API_BASE_URL`.
 
-```powershell
-cd java-mini-project
-```
+## Ollama and Qwen setup
 
-Open this folder in Visual Studio Code.
-
-### Step 3: Configure API Keys
-
-Set the OpenWeatherMap API key in the same PowerShell terminal that will run the application.
-
-### Step 4: Compile and start the browser app with Java 17
-
-From PowerShell, run the following commands (the project folder is named `java-mini-project`; Windows paths are case-insensitive):
-
-```powershell
-cd "D:\Git Hub Projects\Java Mini Project\Java-mini-project\src"
-javac *.java
-java --add-modules jdk.httpserver -cp . WeatherWebServer
-```
-
-Then open **http://localhost:8080**. Keep this terminal open while using the dashboard.
-
-### Step 5: Start Ollama for local chat
-
-Make sure the Qwen model is available:
+Check whether Ollama is running and the model is installed:
 
 ```powershell
 ollama list
 ```
 
-If needed, download it with `ollama pull qwen3.5:latest`. Ollama must be running and listening on its default address, `http://localhost:11434`. If it is not already running, start it in another terminal with `ollama serve`.
-
-Ollama must be running and listening on its default address, `http://127.0.0.1:11434`. If it is not already running, start it in another terminal with `ollama serve`. The server uses `qwen3.5:latest` by default. To use a different installed Ollama model, set `OLLAMA_MODEL` in the same terminal that starts the Java web server.
-
-### Step 6: Run the Java Terminal Weather App
+If the model is missing, install it:
 
 ```powershell
-java Main
+ollama pull qwen3.5:latest
 ```
 
-Enter a city name when prompted. The app prints current conditions, temperature, humidity, and wind speed.
+Ollama Desktop normally runs the local service automatically. **Do not run `ollama serve` if it is already running.** Start `ollama serve` in a separate terminal only if Ollama is not running.
 
-Press Enter at the city prompt to speak a city or ask for its weather. The terminal voice assistant uses Windows PowerShell and the built-in `System.Speech` service. A microphone and an installed Windows speech recognizer are required; if voice input is unavailable, type a city when prompted.
+## Run the project
 
-Run both commands from the `src` directory. No build tool or external JAR is needed.
+Open three PowerShell terminals in the project root.
 
-Use the **Ask SkyCast** panel to chat with your local Qwen model. After weather loads successfully, SkyCast includes the current conditions and forecast in the chat context, so Qwen can answer questions about the displayed city. Chat messages go through the Java server to Ollama and are not sent to a hosted AI service. For this setup, open the website on the same device where Ollama is running; a public deployment cannot directly access Ollama on your personal computer.
-
-In a browser that supports the Web Speech API, select **Speak**, allow microphone access, and say a city or a request such as “weather in Chennai.” The dashboard reads the current conditions and the next forecast aloud. Browser voice search works on localhost and may require a secure connection and microphone permission.
-
-## 🌦️ Weather API
-
-The terminal app requests current conditions directly from OpenWeatherMap. The browser server also exposes `/api/weather?city=Chennai` and `/api/forecast?city=Chennai`. Both use `OPENWEATHER_API_KEY`; the key stays on the server and is not sent to the browser.
-
-The browser server exposes `POST /api/chat` for the local assistant. It connects to Ollama at `http://127.0.0.1:11434/api/chat`; set `OLLAMA_MODEL` if your installed model uses a different tag.
-
-## ⚠️ Troubleshooting
-
-### Port 8080 Is Already in Use
-
-Check the process using port 8080:
+**Terminal 1 — Spring Boot backend**
 
 ```powershell
-Get-NetTCPConnection -LocalPort 8080 -State Listen
+cd backend
+mvn spring-boot:run
 ```
 
-Check the process ID shown under `OwningProcess`:
+The backend starts at `http://localhost:8080`. It finds the root `.env` when launched from the `backend` directory.
+
+**Terminal 2 — React frontend**
 
 ```powershell
-Get-Process -Id YOUR_PID
+cd frontend
+npm install
+npm run dev
 ```
 
-If you confirm it is your previous Java weather server, stop it:
+Open `http://localhost:5173`. The browser voice input requires microphone permission and a browser that supports `SpeechRecognition` or `webkitSpeechRecognition`. Voice responses use `window.speechSynthesis`.
+
+**Terminal 3 — Ollama status**
 
 ```powershell
-Stop-Process -Id YOUR_PID -Force
+ollama list
 ```
 
-Then start the application again.
+Confirm that `qwen3.5:latest` is listed. Do not launch a second Ollama service when it is already running. Chat needs Ollama; weather search does not.
 
-### Weather Data Is Not Loading
+## API endpoints
 
-* Verify that `OPENWEATHER_API_KEY` is configured.
-* Check your internet connection.
-* Check the server terminal for error messages.
-* Confirm that the OpenWeatherMap API key has access to the requested endpoints.
-* Test the weather endpoint directly:
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/weather?city=Chennai` | Current weather |
+| `GET` | `/api/forecast?city=Chennai` | Three-hour forecast entries used for hourly and five-day views |
+| `POST` | `/api/chat` | Local Qwen chat with current weather context when a city is supplied |
 
-```text
-http://localhost:8080/api/weather?city=Chennai
+Example chat request:
+
+```json
+{
+  "message": "Should I carry an umbrella?",
+  "city": "Chennai",
+  "history": []
+}
 ```
 
-### Local Chat Is Not Responding
+Weather and chat errors return JSON with an `error` message and HTTP status. The backend does not return the OpenWeatherMap API key.
 
-* Make sure Ollama is running (`ollama serve` if it is not already running).
-* Run `ollama list` and confirm that `qwen3.5:latest` is installed, or set `OLLAMA_MODEL` to an installed model tag before starting the Java server.
-* The browser, Java server, and Ollama must be on the same device for this local setup.
+## Troubleshooting
 
-## 🔒 Security
+- **Backend command not found:** install Maven and JDK 17, reopen PowerShell, and verify `mvn -version` and `java -version`.
+- **Weather says it is not configured:** set `OPENWEATHER_API_KEY` or check the root `.env` entry, then restart Spring Boot.
+- **City not found:** check spelling and try a city name supported by OpenWeatherMap.
+- **Frontend cannot reach the backend:** confirm Spring Boot is listening on port 8080 and Vite is on port 5173. The backend CORS policy permits the local Vite origin.
+- **Ollama unavailable:** check `ollama list` and ensure the local Ollama application/service is running. Do not start a duplicate server.
+- **Qwen model missing:** run `ollama pull qwen3.5:latest`, or set `OLLAMA_MODEL` to a model listed by `ollama list`.
+- **Voice search unavailable:** use a browser with Web Speech API support, allow microphone access, or type the city instead. Speech synthesis availability varies by browser and operating system.
+- **Port in use:** inspect the listener before stopping anything:
 
-* Do not hardcode API keys in Java or HTML files.
-* Do not upload API keys to GitHub.
-* Use environment variables to configure credentials.
-* If a key is accidentally exposed, revoke it and generate a replacement.
+  ```powershell
+  Get-NetTCPConnection -LocalPort 8080 -State Listen
+  Get-NetTCPConnection -LocalPort 5173 -State Listen
+  ```
 
-## 🚀 Future Enhancements
+## Original application
 
-* Automatic location-based weather
-* Weather alerts and notifications
-* Weather data visualization and charts
-* Unit conversion between Celsius and Fahrenheit
-* More detailed forecast analytics
-* Automated tests
-
-## 👨‍💻 Author
-
-**Balaji**
-
-GitHub: [balajiads](https://github.com/balajiads)
-
-## 📄 License
-
-This project is intended for learning and educational purposes. Add a license file if you want to specify the terms under which others may use or distribute the project.
+The original Java command-line app and static web app under `src/` are intentionally retained. The separated `backend/` and `frontend/` implementation can be built and run independently; the old files are not required by the new app.

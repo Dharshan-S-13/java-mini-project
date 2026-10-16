@@ -1,0 +1,5 @@
+/* Minimal placeholder styles to preserve layout during migration */
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; padding:0; }
+.page-shell { max-width: 1000px; margin: 0 auto; padding: 16px; }
+.site-header { display:flex; justify-content:space-between; align-items:center; }
+.search-form { display:flex; gap:8px; margin:16px 0; }
