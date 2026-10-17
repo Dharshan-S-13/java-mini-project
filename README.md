@@ -16,6 +16,25 @@ OpenWeatherMap                   Ollama + Qwen 3.5
                                   (http://127.0.0.1:11434)
 ```
 
+## Dashboard features
+
+- Search for a city to view live weather conditions, including temperature, feels-like temperature, humidity, wind, and pressure.
+- Browse upcoming hourly conditions and a five-day forecast with daily high/low temperatures and precipitation chances.
+- Ask the VaanilAI assistant weather questions using a locally running Qwen model.
+- Use voice input to search for a city and have weather summaries read aloud, where supported by the browser.
+- Switch between light and dark themes; the dashboard's weather backdrop also responds to current conditions.
+
+## Technology used
+
+| Area | Technology |
+| --- | --- |
+| Frontend | React 18, Vite 6, JavaScript, and custom CSS |
+| Backend | Java 17, Spring Boot 3.4, and Gradle |
+| Weather data | OpenWeatherMap API |
+| AI assistant | Ollama with the Qwen 3.5 model, running locally |
+| Browser features | Web Speech API for voice search and speech synthesis |
+| Frontend/backend communication | HTTP and JSON |
+
 ## Requirements
 
 - Java Development Kit (JDK) 17
